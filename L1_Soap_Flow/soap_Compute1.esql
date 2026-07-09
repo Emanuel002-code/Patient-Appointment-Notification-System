@@ -1,0 +1,26 @@
+
+
+CREATE COMPUTE MODULE soap_Compute1
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+	
+            DELETE FIELD OutputRoot;
+
+        SET OutputRoot.Properties = InputRoot.Properties;
+
+        CREATE LASTCHILD OF OutputRoot DOMAIN 'XMLNSC';
+
+        DECLARE appt NAMESPACE 'http://cityclinic.co.za/appointments';
+
+        CREATE LASTCHILD OF OutputRoot.XMLNSC.appt:BookAppointmentResponse;
+
+        SET OutputRoot.XMLNSC.appt:BookAppointmentResponse.Status = 'FAILED';
+
+        SET OutputRoot.XMLNSC.appt:BookAppointmentResponse.ConfirmationID =
+            '';
+
+        RETURN TRUE;
+
+
+	END;
+END MODULE;

@@ -1,0 +1,24 @@
+
+
+CREATE COMPUTE MODULE soap_Compute2
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+	
+	 DELETE FIELD OutputRoot;
+
+        -- Preserve properties
+        SET OutputRoot.Properties = InputRoot.Properties;
+
+        -- Use XMLNSC response structure
+        CREATE LASTCHILD OF OutputRoot DOMAIN 'XMLNSC';
+
+        DECLARE appt NAMESPACE 'http://cityclinic.co.za/appointments';
+
+        CREATE LASTCHILD OF OutputRoot.XMLNSC.appt:BookAppointmentResponse;
+      
+        SET OutputRoot.XMLNSC.appt:BookAppointmentResponse.ConfirmationID = InputRoot.JSON.Data.payload.appointment_id;
+
+        SET OutputRoot.XMLNSC.appt:BookAppointmentResponse.Status  = 'SUCCESS';
+
+	END;
+END MODULE;

@@ -1,0 +1,42 @@
+
+
+CREATE COMPUTE MODULE dl_processing_Compute2
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		
+		
+	DECLARE v_error_code CHARACTER;
+    DECLARE v_error_desc CHARACTER;
+    DECLARE v_payload CHARACTER;
+    DECLARE v_msg_id CHARACTER;
+
+    -- Read from Environment
+    SET v_error_code = Environment.Variables.Error.Code;
+    SET v_error_desc = Environment.Variables.Error.Description;
+    SET v_msg_id     = COALESCE(InputRoot.JSON.Data.messageId, 'UNKNOWN msgID');
+
+    -- Convert payload
+    SET v_payload = CAST(ASBITSTREAM(InputRoot.JSON.Data) AS CHARACTER CCSID 1208) || ' ' ||v_error_desc;
+
+    -- Insert into log table
+    INSERT INTO Database.PostgreSQL35W.clinic.appt_dlq_log
+    (
+        message_id,
+        error_code,
+        error_desc,
+        raw_payload
+    )
+    VALUES
+    (
+        v_msg_id,
+        v_error_code,
+        v_error_desc,
+        v_payload
+    );
+
+
+    RETURN TRUE;
+END;
+
+END MODULE;

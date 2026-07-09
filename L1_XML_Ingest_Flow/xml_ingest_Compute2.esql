@@ -1,0 +1,115 @@
+
+
+CREATE COMPUTE MODULE xml_ingest_Compute2
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		
+ ---------------------------------SET  MQMD for Error-------------------------------------------------
+  
+   -- SET OutputRoot.JSON.Data.error = InputExceptionList;
+CREATE LASTCHILD OF OutputRoot DOMAIN 'JSON';
+
+DECLARE errorCode CHARACTER '';
+DECLARE errorDesc CHARACTER '';
+
+DECLARE refErr REFERENCE TO InputExceptionList.*[1];
+
+WHILE LASTMOVE(refErr) DO
+
+    IF refErr.Number IS NOT NULL THEN
+        SET errorCode = CAST(refErr.Number AS CHARACTER);
+    END IF;
+
+    IF refErr.Text IS NOT NULL THEN
+        SET errorDesc = CAST(refErr.Text AS CHARACTER);
+    END IF;
+
+    MOVE refErr LASTCHILD;
+
+END WHILE;
+
+SET OutputRoot.JSON.Data.Error.errorCode = errorCode;
+SET OutputRoot.JSON.Data.Error.errorDesc = errorDesc;
+
+   
+   
+/*   
+   -- Ensure MQMD exists
+    IF NOT EXISTS(OutputRoot.MQMD[]) THEN
+      CREATE FIELD OutputRoot.MQMD;
+    END IF;
+
+
+
+    -- Mark as error message
+    SET OutputRoot.MQMD.CorrelId = InputRoot.MQMD.MsgId; */
+
+    -- Custom error id
+   --  SET OutputRoot.MQMD.MsgId = CAST('ERROR-' || CAST(CURRENT_TIMESTAMP AS CHARACTER) AS BLOB CCSID 1208);
+
+
+
+----------------------------------------------------------------------------------------------------
+    
+		
+		
+		
+--	DECLARE ns NAMESPACE 'http://cityclinic.co.za/appt';
+    DECLARE inRef REFERENCE TO InputRoot.XMLNSC.*:AppointmentRequest;
+
+   -- CREATE LASTCHILD OF OutputRoot DOMAIN 'JSON';
+   
+     
+     
+    
+   SET OutputRoot.JSON.Data.messageId ='MSG-' || CAST(CURRENT_TIMESTAMP AS CHAR FORMAT 'yyyyMMddHHmmss');
+
+   SET OutputRoot.JSON.Data.source = 'legacy-emr';
+
+   SET OutputRoot.JSON.Data.format = 'xml';
+
+   SET OutputRoot.JSON.Data.receivedAt = CAST(CURRENT_TIMESTAMP AS CHAR FORMAT 'yyyy-MM-dd''T''HH:mm:ss''Z');
+    
+
+
+   ------------------------------Payload------------------------------------------
+
+    SET OutputRoot.JSON.Data.payload.appointment_id = inRef.*:AppointmentID;
+
+    SET OutputRoot.JSON.Data.payload.patient.id   = inRef.*:Patient.*:PatientID;
+    SET OutputRoot.JSON.Data.payload.patient.name = inRef.*:Patient.*:FullName;
+    SET OutputRoot.JSON.Data.payload.patient.dob  = inRef.*:Patient.*:DateOfBirth;
+
+    SET OutputRoot.JSON.Data.payload.doctor = inRef.*:Doctor;
+   
+
+
+    IF inRef.*:DateTime IS NOT NULL  THEN
+
+        DECLARE dt CHARACTER CAST(inRef.*:DateTime AS CHARACTER);
+        DECLARE pos INT POSITION('T' IN dt);
+
+        -- Only split if 'T' exists
+        IF pos > 0 THEN
+            SET OutputRoot.JSON.Data.payload.date = SUBSTRING(dt FROM 1 FOR pos - 1);
+            SET OutputRoot.JSON.Data.payload.time = SUBSTRING(dt FROM pos + 1);
+        ELSE
+            -- fallback if no T found
+            SET OutputRoot.JSON.Data.payload.date = dt;
+            SET OutputRoot.JSON.Data.payload.time = NULL;
+        END IF;
+
+    ELSE
+        -- handle missing DateTime
+        SET OutputRoot.JSON.Data.payload.date = NULL;
+        SET OutputRoot.JSON.Data.payload.time = NULL;
+    END IF;
+    
+     SET OutputRoot.JSON.Data.payload.reason = inRef.*:Reason;
+
+    RETURN TRUE;
+
+END;
+
+END MODULE;

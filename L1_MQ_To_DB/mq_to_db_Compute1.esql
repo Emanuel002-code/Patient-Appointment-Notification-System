@@ -1,0 +1,83 @@
+
+
+CREATE COMPUTE MODULE mq_to_db_Compute1
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+	
+
+    DECLARE v_error_code CHARACTER;
+    DECLARE v_error_desc CHARACTER;
+    DECLARE v_payload CHARACTER;
+    DECLARE v_msg_id CHARACTER;
+
+    -- Read from Environment
+    SET v_error_code = Environment.Error.SQLSTATE;
+    SET v_error_desc = Environment.Error.SQLERRORTEXT;
+    SET v_msg_id     = COALESCE(InputRoot.JSON.Data.messageId, 'UNKNOWN msgID');
+   -------------------------------
+    
+    DECLARE refRow ROW;
+    SET refRow.appt_id =
+    THE(
+        SELECT ITEM A.appt_id
+        FROM Database.PostgreSQL35W.clinic.appointments AS A
+        WHERE A.appt_id = InputRoot.JSON.Data.payload.appointment_id
+    );  
+    ---------------------------------------------------
+    IF refRow.appt_id IS NOT NULL THEN
+      DECLARE refErr REFERENCE TO InputExceptionList.*[1];
+
+      WHILE LASTMOVE(refErr) DO
+
+       IF refErr.Number IS NOT NULL THEN
+            SET v_error_code = CAST(refErr.Number AS CHARACTER);
+       END IF;
+       IF refErr.Text IS NOT NULL THEN
+              SET v_error_desc = CAST(refErr.Text AS CHARACTER);
+       END IF;
+      MOVE refErr LASTCHILD;
+
+     END WHILE;	
+    END IF;
+    ------------------------------------------------
+    -- Convert payload
+    SET v_payload = CAST(ASBITSTREAM(InputRoot.JSON.Data) AS CHARACTER CCSID 1208);
+
+    -- Insert into log table
+    INSERT INTO Database.PostgreSQL35W.clinic.appt_dlq_log
+    (
+        message_id,
+        error_code,
+        error_desc,
+        raw_payload
+    )
+    VALUES
+    (
+        v_msg_id,
+        v_error_code,
+        v_error_desc,
+        v_payload
+    );
+
+    -- Pass message forward to DLQ
+               
+/*DECLARE appt_id CHARACTER;
+
+SET appt_id = THE(
+    SELECT appt_id
+    FROM Database.PostgreSQL35W.clinic.appointments
+    WHERE appt_id =InputRoot.JSON.Data.payload.appointment_id
+);*/
+
+-- IF NOT FOUND → allow message
+IF refRow.appt_id IS NULL THEN
+       SET OutputRoot.JSON.Data = InputRoot.JSON.Data;
+    RETURN TRUE;
+END IF;
+
+-- IF (duplicate) -BLOCK message
+RETURN FALSE;
+
+END;
+
+END MODULE;

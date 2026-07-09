@@ -1,0 +1,86 @@
+
+
+CREATE COMPUTE MODULE mq_to_db_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		
+    DECLARE EXIT HANDLER FOR SQLSTATE '*'
+    BEGIN
+    	       
+            SET Environment.Error.SQLSTATE = SQLSTATE;
+            SET Environment.Error.SQLERRORTEXT = CAST(SQLERRORTEXT AS CHARACTER);
+            SET OutputRoot.JSON = InputRoot.JSON;
+        RETURN FALSE;
+    END;
+		
+		
+				
+    DECLARE v_appt_id CHARACTER;
+    DECLARE v_patient_id CHARACTER;
+    DECLARE v_patient_name CHARACTER;
+    DECLARE v_dob DATE;
+    DECLARE v_doctor CHARACTER;
+    DECLARE v_department CHARACTER;
+    DECLARE v_date DATE;
+    DECLARE v_time TIME;
+    DECLARE v_reason CHARACTER;
+    DECLARE v_duration INT;
+    DECLARE v_source_format CHARACTER;
+    DECLARE v_status CHARACTER;
+
+    -- Extract and CAST
+    SET v_appt_id      = InputRoot.JSON.Data.payload.appointment_id;
+    SET v_patient_id   = InputRoot.JSON.Data.payload.patient.id;
+    SET v_patient_name = InputRoot.JSON.Data.payload.patient.name;
+    SET v_dob          = CAST(InputRoot.JSON.Data.payload.patient.dob AS DATE FORMAT 'yyyy-MM-dd');
+    SET v_doctor       = InputRoot.JSON.Data.payload.doctor;
+    SET v_department   = InputRoot.JSON.Data.payload.department;
+    SET v_date         = CAST(InputRoot.JSON.Data.payload.date AS DATE FORMAT 'yyyy-MM-dd');
+    SET v_time         = CAST(  InputRoot.JSON.Data.payload.time || ':00' AS TIME);
+    SET v_reason       = InputRoot.JSON.Data.payload.reason;
+    SET v_duration     = InputRoot.JSON.Data.payload.duration_mins;
+    SET v_source_format= InputRoot.JSON.Data.source;
+    SET v_status       = 'PENDING';
+
+    -- Insert into DB
+    
+    INSERT INTO Database.PostgreSQL35W.clinic.appointments
+    (
+        appt_id,
+        patient_id,
+        patient_name,
+        patient_dob,
+        doctor,
+        department,
+        appt_date,
+        appt_time,
+        reason,
+        duration_mins,
+        source_format,
+        status
+    )
+    VALUES
+    (
+        v_appt_id,
+        v_patient_id,
+        v_patient_name,
+        v_dob,
+        v_doctor,
+        v_department,
+        v_date,
+        v_time,
+        v_reason,
+        v_duration,
+        v_source_format,
+        v_status
+    );
+
+    RETURN TRUE;
+    
+END;
+
+END MODULE;
+		
+		
+		

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cityclinic.co.za/appt" xmlns="http://cityclinic.co.za/appt"  elementFormDefault="qualified">
+    <xsd:element name="AppointmentRequest"
+    	type="AppointmentRequestType">
+    </xsd:element>
+    
+    <xsd:complexType name="AppointmentRequestType">
+    	<xsd:sequence>
+    		<xsd:element name="AppointmentID" type="xsd:string"></xsd:element>
+    		<xsd:element name="Patient" type="PatientType"></xsd:element>
+    		<xsd:element name="Doctor" type="xsd:string"></xsd:element>
+    		<xsd:element name="DateTime" type="xsd:string"></xsd:element>
+    		<xsd:element name="Reason" type="xsd:string"></xsd:element>
+    	</xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="PatientType">
+    	<xsd:sequence>
+    		<xsd:element name="PatientID" type="xsd:string"></xsd:element>
+    		<xsd:element name="FullName" type="xsd:string"></xsd:element>
+    		<xsd:element name="DateOfBirth" type="xsd:string"></xsd:element>
+    	</xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

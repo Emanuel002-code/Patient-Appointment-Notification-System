@@ -1,0 +1,114 @@
+
+
+CREATE COMPUTE MODULE csv_batch_Compute2
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+---------------------------------SET  Error-------------------------------------------------
+CREATE LASTCHILD OF OutputRoot DOMAIN 'JSON';
+
+DECLARE errorCode CHARACTER '';
+DECLARE errorDesc CHARACTER '';
+
+DECLARE refErr REFERENCE TO InputExceptionList.*[1];
+
+WHILE LASTMOVE(refErr) DO
+
+    IF refErr.Number IS NOT NULL THEN
+        SET errorCode = CAST(refErr.Number AS CHARACTER);
+    END IF;
+
+    IF refErr.Text IS NOT NULL THEN
+        SET errorDesc = CAST(refErr.Text AS CHARACTER);
+    END IF;
+
+    MOVE refErr LASTCHILD;
+
+END WHILE;
+
+SET OutputRoot.JSON.Data.Error.errorCode = errorCode;
+SET OutputRoot.JSON.Data.Error.errorDesc = errorDesc;
+
+IF errorDesc IS NULL OR TRIM(errorCode) = '' THEN
+    SET OutputRoot.JSON.Data.Error.errorCode = 'Unknown';
+ ELSE
+    SET OutputRoot.JSON.Data.Error.errorDesc = errorCode;
+ END IF;
+
+
+ --SET OutputRoot.JSON.Data.Error.errorCode = errorCode;
+
+ IF errorDesc IS NULL OR TRIM(errorDesc) = '' THEN
+    SET OutputRoot.JSON.Data.Error.errorDesc = 'Missing value';
+ ELSE
+    SET OutputRoot.JSON.Data.Error.errorDesc = errorDesc;
+ END IF;
+   
+    
+  /*  
+  
+    IF NOT EXISTS(OutputRoot.MQMD[]) THEN
+      CREATE FIELD OutputRoot.MQMD;
+    END IF;
+
+
+
+    SET OutputRoot.MQMD.CorrelId = InputRoot.MQMD.MsgId;
+*/
+  
+ --   SET OutputRoot.MQMD.MsgId = CAST('ERROR-' || CAST(CURRENT_TIMESTAMP AS CHARACTER) AS BLOB CCSID 1208);
+
+
+
+----------------------------------------------------------------------------------------------------
+
+
+
+
+   -- CREATE LASTCHILD OF OutputRoot DOMAIN 'JSON'; 
+
+
+    SET OutputRoot.JSON.Data.messageId ='MSG-' || CAST(CURRENT_TIMESTAMP AS CHAR FORMAT 'yyyyMMddHHmmss');
+
+    SET OutputRoot.JSON.Data.source = 'csv-upload';
+
+    SET OutputRoot.JSON.Data.format = 'csv';
+
+    SET OutputRoot.JSON.Data.receivedAt = CAST(CURRENT_TIMESTAMP AS CHAR FORMAT 'yyyy-MM-dd''T''HH:mm:ss''Z');
+    
+    
+    DECLARE ref REFERENCE TO InputRoot.DFDL.AppointmentCSV.AppointmentRow;
+    
+    
+    SET OutputRoot.JSON.Data.payload.appintment_id = ref.appointment_id;
+    SET OutputRoot.JSON.Data.payload.patient.id = ref.patient_id;
+    SET OutputRoot.JSON.Data.payload.patient.name = ref.patient_name;
+    SET OutputRoot.JSON.Data.payload.patient.dob = ref.dob;
+    SET OutputRoot.JSON.Data.payload.doctor = ref.doctor;
+    SET OutputRoot.JSON.Data.payload.department = ref.department;
+    SET OutputRoot.JSON.Data.payload.date= ref.appt_date;
+    SET OutputRoot.JSON.Data.payload.time= ref.appt_time;
+    SET OutputRoot.JSON.Data.payload.reason= ref.reason;
+
+     
+
+
+
+
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;

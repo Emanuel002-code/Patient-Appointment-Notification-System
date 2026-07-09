@@ -1,0 +1,98 @@
+
+
+CREATE COMPUTE MODULE hl7_v2_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+
+
+    CREATE LASTCHILD OF OutputRoot DOMAIN 'JSON';
+    
+    DECLARE refMSH REFERENCE TO InputRoot.DFDL.*:ApointmentHL7.*:MSH;
+    DECLARE refSCH REFERENCE TO InputRoot.DFDL.*:ApointmentHL7.*:SCH;
+    DECLARE refPID REFERENCE TO InputRoot.DFDL.*:ApointmentHL7.*:PID;
+    DECLARE refAIG REFERENCE TO InputRoot.DFDL.*:ApointmentHL7.*:AIG;
+       
+
+
+    SET OutputRoot.JSON.Data.messageId ='MSG-' || CAST(CURRENT_TIMESTAMP AS CHAR FORMAT 'yyyyMMddHHmmss');
+    SET OutputRoot.JSON.Data.format = 'txt';
+    ---------------------------MSH----------------------------------
+    SET OutputRoot.JSON.Data.source = refMSH.SendingApp;
+
+    SET OutputRoot.JSON.Data.receivedAt = refMSH.DateTime;
+
+
+    -------------------------------SCH------------------------------
+    SET OutputRoot.JSON.Data.payload.appointment_id = refSCH.ApptID;
+
+    -- Reason : General Practice^Annual Checkup
+    DECLARE reasonFull CHARACTER refSCH.Reason;
+
+   DECLARE pos INT POSITION('^' IN reasonFull);
+   IF pos > 0 THEN
+      SET OutputRoot.JSON.Data.payload.reason = SUBSTRING(reasonFull FROM pos + 1);
+   ELSE
+      SET OutputRoot.JSON.Data.payload.reason = reasonFull;
+   END IF;
+
+  -----------------------------PID--------------------------------------
+    -- Patient ID: PT-0099^^^CLINIC^MR → PT-0099
+    DECLARE patientFull CHARACTER refPID.PatientID;
+
+    DECLARE posId INT POSITION('^' IN patientFull);
+    IF posId > 0 THEN
+            SET OutputRoot.JSON.Data.payload.patient.id =  SUBSTRING(patientFull FROM 1 FOR posId - 1);
+    ELSE
+            SET OutputRoot.JSON.Data.payload.patient.id = patientFull;
+    END IF;
+
+    -- Name: Khumalo^Lindiwe → Lindiwe Khumalo
+    DECLARE nameFull CHARACTER refPID.PatientName;
+    SET OutputRoot.JSON.Data.payload.patient.name= REPLACE(nameFull, '^', ' ');
+
+    DECLARE dobRaw CHARACTER refPID.DOB;
+    SET OutputRoot.JSON.Data.payload.patient.dob =
+      SUBSTRING(dobRaw FROM 1 FOR 4) || '-' ||
+      SUBSTRING(dobRaw FROM 5 FOR 2) || '-' ||
+      SUBSTRING(dobRaw FROM 7 FOR 2);
+
+ -------------------------------------AIG--------------------------------------------
+    -- Doctor: Dr. Zara Osei^Physician → Dr. Zara Osei
+    DECLARE doctorFull CHARACTER refAIG.Doctor;
+    DECLARE posDoc INT POSITION('^' IN doctorFull);
+    IF posDoc > 0 THEN
+      SET OutputRoot.JSON.Data.payload.doctor = SUBSTRING(doctorFull FROM 1 FOR posDoc - 1);
+    ELSE
+      SET OutputRoot.JSON.Data.payload.doctor = doctorFull;
+    END IF;
+    
+    -- DateTime: 20240418^0830
+    DECLARE dt CHARACTER  refAIG.DateTime;
+    DECLARE posDT INT POSITION('^' IN dt);
+    IF posDT > 0 THEN
+    DECLARE rawDate CHARACTER SUBSTRING(dt FROM 1 FOR posDT - 1);
+   
+    SET OutputRoot.JSON.Data.payload.date =
+        SUBSTRING(rawDate FROM 1 FOR 4) || '-' ||
+        SUBSTRING(rawDate FROM 5 FOR 2) || '-' ||
+        SUBSTRING(rawDate FROM 7 FOR 2);
+        
+    DECLARE rawTime CHARACTER SUBSTRING(dt FROM posDT + 1);
+
+     SET OutputRoot.JSON.Data.payload.time =
+         SUBSTRING(rawTime FROM 1 FOR 2) || ':' ||
+         SUBSTRING(rawTime FROM 3 FOR 2);
+    ELSE
+
+       SET OutputRoot.JSON.Data.payload.date = NULL;
+       SET OutputRoot.JSON.Data.payload.time = NULL;
+
+    END IF;
+
+    -- Duration
+    SET OutputRoot.JSON.Data.payload.duration_mins =  CAST(refAIG.Duration AS INTEGER);
+
+    RETURN TRUE;
+
+END;
+END MODULE;

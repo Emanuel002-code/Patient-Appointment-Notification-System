@@ -1,0 +1,22 @@
+
+
+Importing file: C:\Users\emanu\IBM\ACET12\workspace\L1_Soap_Flow\WSDLFile.wsdl
+
+The WSDL import will proceed with bindings WSDLFileSOAP.
+Creating wsdl schema document for file:///C:/Users/emanu/IBM/ACET12/workspace/L1_Soap_Flow/WSDLFile.wsdl.
+Parsing wsdl binding {http://cityclinic.co.za/appointments}WSDLFileSOAP.
+Parsing wsdl binding input NewOperation.
+Parsing wsdl binding output NewOperation.
+Processing doc style for operation NewOperation.
+Populating WSDL schema WSDLFile.xsd.
+Creating file WSDLFile.xsd in the workspace.
+Creating file WSDLFile_InlineSchema1.xsd in the workspace.
+Copying source WSDL WSDLFile.wsdl to WSDLFile.wsdl.
+
+Elapsed time processing this message definition file: 0.249 seconds
+Number of warnings for this message definition file: 0
+
+
+Number of files processed: 1
+
+

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:appt="http://cityclinic.co.za/appointments" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://cityclinic.co.za/appointments">
+        
+  <xsd:element ibmSchExtn:docRoot="true" name="BookAppointmentRequest">
+            
+    <xsd:complexType>
+                
+      <xsd:sequence>
+                    
+        <xsd:element name="AppointmentID" type="xsd:string"/>
+                    
+        <xsd:element name="PatientName" type="xsd:string"/>
+                  	
+        <xsd:element name="Doctor" type="xsd:string"/>
+                  	
+        <xsd:element name="Department" type="xsd:string"/>
+                  	
+        <xsd:element name="Date" type="xsd:string"/>
+                  	
+        <xsd:element name="Time" type="xsd:string"/>
+                  
+      </xsd:sequence>
+              
+    </xsd:complexType>
+          
+  </xsd:element>
+        
+  <xsd:element ibmSchExtn:docRoot="true" name="BookAppointmentResponse">
+            
+    <xsd:complexType>
+                
+      <xsd:sequence>
+                  	
+        <xsd:element name="ConfirmationID" type="xsd:string"/>
+                  	
+        <xsd:element name="Status" type="xsd:string"/>
+                  
+      </xsd:sequence>
+              
+    </xsd:complexType>
+          
+  </xsd:element>
+      
+</xsd:schema>

@@ -1,0 +1,43 @@
+
+
+CREATE COMPUTE MODULE csv_batch_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+DECLARE rowRef REFERENCE TO InputRoot.DFDL.*:AppointmentCSV.*:AppointmentRow[1];
+
+WHILE LASTMOVE(rowRef) DO
+
+    DELETE FIELD OutputRoot;
+    CREATE LASTCHILD OF OutputRoot DOMAIN 'DFDL';
+
+    -- COPY DATA PROPERLY (NOT REFERENCE)
+    SET OutputRoot.DFDL.AppointmentCSV.AppointmentRow = rowRef;
+
+    IF rowRef.appointment_id IS NULL 
+     OR rowRef.patient_id IS NULL 
+     OR rowRef.patient_name IS NULL 
+     OR rowRef.dob IS NULL 
+     OR rowRef.doctor IS NULL 
+     OR rowRef.department IS NULL 
+     OR rowRef.appt_date IS NULL 
+     OR rowRef.appt_time IS NULL 
+     OR rowRef.reason IS NULL  THEN
+
+        PROPAGATE TO TERMINAL 'out1';
+       -- RETURN FALSE;
+
+    ELSE
+
+        PROPAGATE TO TERMINAL 'out';
+     --   RETURN FALSE;
+
+    END IF;
+
+    MOVE rowRef NEXTSIBLING;
+
+END WHILE;
+
+RETURN FALSE;
+END;
+
+END MODULE;

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:csv="http://www.ibm.com/dfdl/CommaSeparatedFormat" xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:ibmDfdlExtn="http://www.ibm.com/dfdl/extensions" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cityclinic.co.za/appt" xmlns:appt="http://cityclinic.co.za/appt">
+        
+  
+  <xsd:import namespace="http://www.ibm.com/dfdl/CommaSeparatedFormat" schemaLocation="IBMdefined/CommaSeparatedFormat.xsd"/>
+        
+  
+  <xsd:annotation>
+        		
+    
+    <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            			
+      
+      <dfdl:format documentFinalTerminatorCanBeMissing="yes" encoding="{$dfdl:encoding}" escapeSchemeRef="csv:CSVEscapeScheme" ref="csv:CommaSeparatedFormat"/>
+            		
+    
+    </xsd:appinfo>
+        	
+  
+  </xsd:annotation>
+    	
+  
+  <xsd:element ibmSchExtn:docRoot="true" name="AppointmentCSV">
+        		
+    
+    <xsd:complexType>
+            			
+      
+      <xsd:sequence dfdl:separator="">
+                				
+        
+        <xsd:element dfdl:terminator="%CR;%LF;%WSP*;" name="header">
+                    					
+          
+          <xsd:complexType>
+                        						
+            
+            <xsd:sequence>
+                            							
+              
+              <xsd:element ibmDfdlExtn:sampleValue="head_value1" minOccurs="0" name="head_field1" type="xsd:string"/>
+                            							
+              
+              <xsd:element ibmDfdlExtn:sampleValue="head_value2" minOccurs="0" name="head_field2" type="xsd:string"/>
+                            							
+							
+              
+              <xsd:element ibmDfdlExtn:sampleValue="head_value3" minOccurs="0" name="head_field3" type="xsd:string"/>
+                            							
+                            
+              
+              <xsd:element ibmDfdlExtn:sampleValue="head_value4" minOccurs="0" name="head_field4" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="head_value5" minOccurs="0" name="head_field5" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="head_value6" minOccurs="0" name="head_field6" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="head_value7" minOccurs="0" name="head_field7" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="head_value8" minOccurs="0" name="head_field8" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="head_value9" minOccurs="0" name="head_field9" type="xsd:string"/>
+                                                    
+            
+            </xsd:sequence>
+                        					
+          
+          </xsd:complexType>
+                    				
+        
+        </xsd:element>
+                			
+				
+        
+        <xsd:element dfdl:occursCountKind="implicit" dfdl:terminator="%CR;%LF;%WSP*;" maxOccurs="unbounded" name="AppointmentRow">
+                    					
+          
+          <xsd:complexType>
+                        						
+            
+            <xsd:sequence>
+                             
+							
+              
+              <xsd:element ibmDfdlExtn:sampleValue="value1" minOccurs="0" name="appointment_id" type="xsd:string"/>
+                            							
+              
+              <xsd:element ibmDfdlExtn:sampleValue="value2" minOccurs="0" name="patient_id" type="xsd:string"/>
+                            							
+              
+              <xsd:element ibmDfdlExtn:sampleValue="value3" minOccurs="0" name="patient_name" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="value4" minOccurs="0" name="dob" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="value5" minOccurs="0" name="doctor" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="value6" minOccurs="0" name="department" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="value7" minOccurs="0" name="appt_date" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="value8" minOccurs="0" name="appt_time" type="xsd:string"/>
+                                                        
+              
+              <xsd:element ibmDfdlExtn:sampleValue="value9" minOccurs="0" name="reason" type="xsd:string"/>
+                                                    
+            
+            </xsd:sequence>
+                        					
+          
+          </xsd:complexType>
+                    				
+        
+        </xsd:element>
+                				
+			
+      
+      </xsd:sequence>
+            		
+    
+    </xsd:complexType>
+        	
+  
+  </xsd:element>
+    
+
+</xsd:schema>

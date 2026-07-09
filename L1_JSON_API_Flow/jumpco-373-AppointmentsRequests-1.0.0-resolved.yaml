@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: City Clinic Appointment API
+  version: 1.0.0
+servers:
+- url: http://localhost:7800/cityclinic/v1
+paths:
+  /appointments:
+    post:
+      summary: Book a new appointment
+      operationId: bookAppointment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentRequest"
+        required: true
+      responses:
+        "202":
+          description: Accepted and queued
+        "400":
+          description: Validation error
+  /appointments/{appointmentId}:
+    get:
+      summary: Get appointment by ID
+      parameters:
+      - name: appointmentId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Appointment record
+        "404":
+          description: Not found
+  /appointments/bulk:
+    post:
+      summary: CSV bulk upload
+      requestBody:
+        content:
+          text/csv:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        "202":
+          description: Batch accepted
+components:
+  schemas:
+    AppointmentRequest:
+      required:
+      - appointment_id
+      - date
+      - doctor
+      - patient
+      - time
+      type: object
+      properties:
+        appointment_id:
+          type: string
+        patient:
+          $ref: "#/components/schemas/PatientInfo"
+        doctor:
+          type: string
+        department:
+          type: string
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+        reason:
+          type: string
+    PatientInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        dob:
+          type: string
+          format: date

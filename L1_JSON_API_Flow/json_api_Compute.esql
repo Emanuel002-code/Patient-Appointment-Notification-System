@@ -1,0 +1,38 @@
+
+
+CREATE COMPUTE MODULE json_api_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+				-- Create JSON output root
+   CREATE LASTCHILD OF OutputRoot DOMAIN 'JSON';
+
+
+   SET OutputRoot.JSON.Data.messageId ='MSG-' || CAST(CURRENT_TIMESTAMP AS CHAR FORMAT 'yyyyMMddHHmmss');
+
+   SET OutputRoot.JSON.Data.source = 'web-api';
+
+   SET OutputRoot.JSON.Data.format = 'json';
+
+   SET OutputRoot.JSON.Data.receivedAt = CAST(CURRENT_TIMESTAMP AS CHAR FORMAT 'yyyy-MM-dd''T''HH:mm:ss''Z');
+
+   SET OutputRoot.JSON.Data.payload = InputRoot.JSON.Data;
+		
+		
+		RETURN TRUE;
+			
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;

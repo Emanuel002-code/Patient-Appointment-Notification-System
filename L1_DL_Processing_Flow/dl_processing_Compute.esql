@@ -1,0 +1,110 @@
+
+
+CREATE COMPUTE MODULE dl_processing_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+
+
+    --------------------------------------------------
+    -- READ ERROR INFORMATION
+    --------------------------------------------------
+    DECLARE errorCode CHARACTER '';
+    DECLARE errorDesc CHARACTER '';
+   
+    
+    SET OutputRoot.JSON.Data.originalMsgId =  CAST(InputRoot.MQMD.CorrelId AS CHARACTER CCSID 1208);
+
+   /*
+    IF InputRoot.JSON.Data.Error.errorCode  IS NULL THEN
+    	SET  errorCode = 'UNKNOWN';
+    ELSE 
+    	SET  errorCode = InputRoot.JSON.Data.Error.errorCode;
+    END IF;
+    
+     IF InputRoot.JSON.Data.Error.errorCode  IS NULL THEN
+    	SET  errorDesc =  'No detailed error info available';
+    ELSE 
+    	SET  errorDesc = InputRoot.JSON.Data.Error.errorDesc ;
+     END IF; */
+     
+     IF InputRoot.JSON.Data.Error.errorCode IS NULL
+       OR TRIM(InputRoot.JSON.Data.Error.errorCode) = '' THEN
+
+          SET errorCode = 'UNKNOWN';
+     ELSE
+          SET errorCode = InputRoot.JSON.Data.Error.errorCode;
+     END IF;
+
+     IF InputRoot.JSON.Data.Error.errorDesc IS NULL
+        OR TRIM(InputRoot.JSON.Data.Error.errorDesc) = '' THEN
+          SET errorDesc = 'No detailed error info available';
+     ELSE
+         SET errorDesc = InputRoot.JSON.Data.Error.errorDesc;
+     END IF;   
+     
+     -- Store for later use (DB logging )
+   
+   
+    SET Environment.Variables.Error.Code = errorCode;
+    SET Environment.Variables.Error.Description = errorDesc;
+
+  
+    --------------------------------------------------
+    -- ATTEMPT TO FIX / DEFAULT OPTIONAL FIELDS
+    --------------------------------------------------
+    
+    SET OutputRoot.JSON.Data = InputRoot.JSON.Data;
+    -- APPT_ID (required)
+    SET OutputRoot.JSON.Data.payload.patient.id = COALESCE(NULLIF(TRIM(OutputRoot.JSON.Data.payload.patient.id), ''), 'UNKNOWN');
+
+     -- PATIENT_NAME (required)
+    SET OutputRoot.JSON.Data.payload.patient.name = COALESCE(NULLIF(TRIM(OutputRoot.JSON.Data.payload.patient.name), ''), 'UNKNOWN_PATIENT');
+    
+     SET OutputRoot.JSON.Data.payload.patient.dob = COALESCE(NULLIF(OutputRoot.JSON.Data.payload.patient.dob, ''),CURRENT_DATE);
+
+        -- APPT_DATE (required)
+    SET OutputRoot.JSON.Data.payload.date = COALESCE(NULLIF(OutputRoot.JSON.Data.payload.date, ''),CURRENT_DATE);
+
+      -- APPT_TIME (required)
+    SET OutputRoot.JSON.Data.payload.time = COALESCE(NULLIF(OutputRoot.JSON.Data.payload.time, ''),CURRENT_TIME);
+
+     -- OPTIONAL FIELDS
+    SET OutputRoot.JSON.Data.payload.department = COALESCE(NULLIF(OutputRoot.JSON.Data.payload.department, ''), 'GENERAL');
+
+    SET OutputRoot.JSON.Data.payload.reason = COALESCE(NULLIF(OutputRoot.JSON.Data.payload.reason, ''), 'NOT_SPECIFIED');
+
+         -- DEFAULT NUMBER
+    SET OutputRoot.JSON.Data.payload.duration_mins = COALESCE(OutputRoot.JSON.Data.payload.duration_mins, 30);
+    
+ 
+
+
+
+    --------------------------------------------------
+    -- DETERMINE IF MESSAGE IS FIXABLE
+    --------------------------------------------------
+
+    IF OutputRoot.JSON.Data.payload.appointment_id IS NOT NULL
+       AND OutputRoot.JSON.Data.payload.doctor IS NOT NULL THEN
+
+        SET Environment.Variables.Fixable = TRUE;
+
+    ELSE
+        SET Environment.Variables.Fixable = FALSE;
+    END IF;
+
+    --------------------------------------------------
+    --  PREVENT INFINITE RETRIES
+    --------------------------------------------------
+
+    IF InputRoot.MQMD.BackoutCount > 3 THEN
+        SET Environment.Variables.Fixable = FALSE;
+        SET Environment.Variables.Error.Description =
+            'Exceeded max retry attempts';
+    END IF;
+
+    RETURN TRUE;
+
+END;
+
+END MODULE;

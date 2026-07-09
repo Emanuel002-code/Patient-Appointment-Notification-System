@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:ibmDfdlExtn="http://www.ibm.com/dfdl/extensions" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions" xmlns:recSepFieldsFmt="http://www.ibm.com/dfdl/RecordSeparatedFieldFormat" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cityclinic.co.za/hl7" xmlns:hl7="http://cityclinic.co.za/hl7">
+          
+  
+  
+  <xsd:import namespace="http://www.ibm.com/dfdl/RecordSeparatedFieldFormat" schemaLocation="IBMdefined/RecordSeparatedFieldFormat.xsd"/>
+          
+  
+  
+  <xsd:annotation>
+            		
+    
+    
+    <xsd:appinfo source="http://www.ogf.org/dfdl/">
+                  			
+      
+      
+      <dfdl:format encoding="{$dfdl:encoding}" escapeSchemeRef="" occursCountKind="implicit" ref="recSepFieldsFmt:RecordSeparatedFieldsFormat"/>
+                  		
+    
+    
+    </xsd:appinfo>
+            	
+  
+  
+  </xsd:annotation>
+      	
+  
+  
+  <xsd:element ibmSchExtn:docRoot="true" name="ApointmentHL7">
+            		
+    
+    
+    <xsd:complexType>
+                  			
+      
+      
+      <xsd:sequence dfdl:separator="%CR;%LF;%WSP*;" dfdl:separatorSuppressionPolicy="anyEmpty">
+                        				
+        			
+                
+        
+        <xsd:element name="MSH" type="hl7:MSHSegment"/>
+                
+        <xsd:element name="SCH" type="hl7:SCHSegment"/>
+                
+        <xsd:element name="PID" type="hl7:PIDSegment"/>
+                
+        <xsd:element name="AIG" type="hl7:AIGSegment"/>
+              
+      </xsd:sequence>
+                  		
+    
+    
+    </xsd:complexType>
+            	
+  
+  
+  </xsd:element>
+      
+
+
+  
+  <xsd:complexType name="MSHSegment">
+      	
+    <xsd:sequence dfdl:separator="|">
+        		
+      <xsd:element name="SegmentID" type="xsd:string"/>
+        		
+      <xsd:element name="EncodingChar" type="xsd:string"/>
+        		
+      <xsd:element name="SendingApp" type="xsd:string"/>
+        		
+      <xsd:element name="SendingFacility" type="xsd:string"/>
+        		
+      <xsd:element name="ReceivingApp" type="xsd:string"/>
+        		
+      <xsd:element name="ReceivingFacility" type="xsd:string"/>
+        		
+      <xsd:element name="DateTime" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement7" type="xsd:string"/>
+        		
+      <xsd:element name="MsgType" type="xsd:string"/>
+        		
+      <xsd:element name="MessageControlID" type="xsd:string"/>
+        		
+      <xsd:element name="ProcessingID" type="xsd:string"/>
+        		
+      <xsd:element name="VersionID" type="xsd:string"/>
+        	
+    </xsd:sequence>
+      
+  </xsd:complexType>
+    
+  <xsd:complexType name="SCHSegment">
+      	
+    <xsd:sequence dfdl:separator="|">
+        		
+      <xsd:element name="SegmentID" type="xsd:string"/>
+        		
+      <xsd:element name="ApptID" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement2" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement3" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement4" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement5" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement6" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement7" type="xsd:string"/>
+        		
+      <xsd:element name="Reason" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement9" type="xsd:string"/>
+        	
+    </xsd:sequence>
+      
+  </xsd:complexType>
+    
+  <xsd:complexType name="PIDSegment">
+      	
+    <xsd:sequence dfdl:separator="|">
+        		
+      <xsd:element name="SegmentID" type="xsd:string"/>
+        		
+      <xsd:element name="SetID" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement2" type="xsd:string"/>
+        		
+      <xsd:element name="PatientID" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement4" type="xsd:string"/>
+        		
+      <xsd:element name="PatientName" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement6" type="xsd:string"/>
+        		
+      <xsd:element name="DOB" type="xsd:string"/>
+        		
+      <xsd:element name="Gender" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement9" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement10" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement11" type="xsd:string"/>
+        	
+    </xsd:sequence>
+      
+  </xsd:complexType>
+    
+  <xsd:complexType name="AIGSegment">
+      	
+    <xsd:sequence dfdl:separator="|">
+        		
+      <xsd:element name="SegmentID" type="xsd:string"/>
+        		
+      <xsd:element name="SetID" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement2" type="xsd:string"/>
+        		
+      <xsd:element name="Doctor" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement4" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement5" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement6" type="xsd:string"/>
+        		
+      <xsd:element name="DateTime" type="xsd:string"/>
+        		
+      <xsd:element name="Duration" type="xsd:string"/>
+        		
+      <xsd:element name="DurationUnits" type="xsd:string"/>
+        		
+      <xsd:element minOccurs="0" name="NewElement10" type="xsd:string"/>
+        	
+    </xsd:sequence>
+      
+  </xsd:complexType>
+  
+</xsd:schema>
